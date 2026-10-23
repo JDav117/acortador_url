@@ -4,3 +4,5 @@ frontend/dist/
 .idea/
 .vscode/
 *.iml
+
+hs_err_pid*.log

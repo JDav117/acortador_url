@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: acortador-enlaces
+  data:
+    mongodb:
+      # MongoDB del docker-compose (puerto 27018). Para usar un MongoDB local: MONGODB_URI=mongodb://localhost:27017/acortador
+      # serverSelectionTimeoutMS: si MongoDB no está disponible, fallar en 3 s en vez de 30 s.
+      uri: ${MONGODB_URI:mongodb://localhost:27018/acortador?serverSelectionTimeoutMS=3000}
+      auto-index-creation: true
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2s
+
+app:
+  base-url: http://localhost:8080
+  cache:
+    ttl-listado: 30s
+    ttl-destino: 10m

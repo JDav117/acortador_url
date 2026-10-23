@@ -1,0 +1,53 @@
+# Desarrollo:   docker compose up -d                  → solo MongoDB y Redis
+# Todo en Docker: docker compose --profile app up -d --build → además backend y frontend
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    # 27018 en el host para no chocar con un servicio MongoDB local de Windows (27017).
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    profiles: ["app"]
+    build: ./backend
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/acortador
+      SPRING_DATA_REDIS_HOST: redis
+      APP_BASE_URL: http://localhost:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    profiles: ["app"]
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
